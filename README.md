@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/ibm-cloud-solutions/hubot-ibmcloud-deploy.svg?branch=master)](https://travis-ci.org/ibm-cloud-solutions/hubot-ibmcloud-deploy)
 # hubot-ibmcloud-deploy
 
 Script package that application deployment to the IBM Cloud through Hubot.
