@@ -1,4 +1,8 @@
 [![Build Status](https://travis-ci.org/ibm-cloud-solutions/hubot-ibmcloud-deploy.svg?branch=master)](https://travis-ci.org/ibm-cloud-solutions/hubot-ibmcloud-deploy)
+
+[![Dependency Status](https://dependencyci.com/github/ibm-cloud-solutions/hubot-ibmcloud-deploy/badge)](https://dependencyci.com/github/ibm-cloud-solutions/hubot-ibmcloud-deploy)
+[![npm](https://img.shields.io/npm/v/hubot-ibmcloud-deploy.svg?maxAge=2592000)](https://www.npmjs.com/package/hubot-ibmcloud-deploy)
+
 # hubot-ibmcloud-deploy
 
 Script package that application deployment to the IBM Cloud through Hubot.

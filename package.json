@@ -58,10 +58,10 @@
     "index.js"
   ],
   "dependencies": {
-    "hubot-cf-convenience": "0.0.4",
-    "hubot-ibmcloud-activity-emitter": "0.0.2",
+    "hubot-cf-convenience": "latest",
+    "hubot-ibmcloud-activity-emitter": "latest",
     "hubot-ibmcloud-cognitive-lib": ">=0.0.19",
-    "hubot-ibmcloud-utils": "0.0.6",
+    "hubot-ibmcloud-utils": "latest",
     "adm-zip": "^0.4.7",
     "hubot-conversation": "^1.1.1",
     "i18n-2": "*",
