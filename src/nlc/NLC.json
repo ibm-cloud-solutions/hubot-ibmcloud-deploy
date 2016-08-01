@@ -1,0 +1,36 @@
+{   "name": "IBMcloudDeploy",
+    "version": "1.0.0",
+    "classes": [
+        {
+            "class": "github.deploy.help",
+            "emittarget": "github.deploy.help",
+            "texts": [
+                "I want help with deployment",
+                "Can I deploy my application from github?",
+                "help me with the deployment of a node application",
+                "help me with the deployment java application",
+                "help me with deployment of a ruby application"
+            ]
+        },
+        {
+            "class": "github.deploy",
+            "emittarget": "github.deploy",
+            "texts": [
+                "I want to deploy my application",
+                "I want to deploy my github application to bluemix"
+            ],
+     	       "parameters" : [
+     			   {
+     			       "name": "appname",
+     			       "type": "entity",
+     			       "prompt": "OK. What is the name of the application you want to deploy?"
+     			   },
+     			   {
+     			       "name": "url",
+     			       "type": "entity",
+     			       "prompt": "OK. What is the *user/repo* for your application?"
+     			   }
+     	       ]
+        }
+    ]
+}
