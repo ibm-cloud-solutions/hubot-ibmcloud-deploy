@@ -3,7 +3,7 @@
     "classes": [
         {
             "class": "github.deploy.help",
-			"description": "Help with application deployment",
+            "description": "Help with application deployment",
             "emittarget": "github.deploy.help",
             "texts": [
                 "I want help with deployment",
@@ -15,7 +15,7 @@
         },
         {
             "class": "github.deploy",
-			"description": "Deploy an application to Bluemix",
+            "description": "Deploy an application to Bluemix",
             "emittarget": "github.deploy",
             "texts": [
                 "I want to deploy my application",
