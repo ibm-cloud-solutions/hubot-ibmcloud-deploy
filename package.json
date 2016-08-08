@@ -37,7 +37,7 @@
     "hubot-ibmcloud-formatter": ">=0.0.10",
     "hubot-ibmcloud-nlc": ">=0.0.20",
     "hubot-shell": "^1.0.2",
-    "hubot-slack": "^3.4.2",
+    "hubot-slack": "^4.0.2",
     "hubot-test-helper": "^1.4.4",
     "istanbul": "0.4.0",
     "mocha": "^2.4.5",
@@ -56,7 +56,7 @@
   "dependencies": {
     "hubot-cf-convenience": "latest",
     "hubot-ibmcloud-activity-emitter": "latest",
-    "hubot-ibmcloud-cognitive-lib": ">=0.0.19",
+    "hubot-ibmcloud-cognitive-lib": "latest",
     "hubot-ibmcloud-utils": "latest",
     "adm-zip": "^0.4.7",
     "hubot-conversation": "^1.1.1",
