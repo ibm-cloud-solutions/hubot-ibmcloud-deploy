@@ -18,7 +18,7 @@
    "github.deploy.name.prompt": "What name would you like to associate with this repo?  It will be the invocation target for future *deploy* commands.",
    "github.deploy.prompt": "Would you like to register an app with me now?",
    "github.deploy.prompt.deny": "Alright.  Maybe we can deploy something another time?",
-   "github.deploy.prompt.name": "Give me a GitHub *user/repo* and the name of your app.",
+   "github.deploy.prompt.name": "Give me a GitHub *user/repo* and the *name* of your app.",
    "github.deploy.register.empty": "You don't have any Bluemix apps registered with me for deployment from GitHub\nNote: I work by generating deployment events against the repository that you provide me.\nAsk me for help by messaging me with *deploy help*.",
    "github.deploy.register.in.progress": "Cool. I'll associate the name *%s* with %s.",
    "github.deploy.register.not.happening": "Ok.  The repo will not be registered with an app name.",
