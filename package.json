@@ -1,6 +1,6 @@
 {
   "name": "hubot-ibmcloud-deploy",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "GitHub Project Deployment to IBM Cloud for hubot",
   "main": "index.js",
   "respository": {
