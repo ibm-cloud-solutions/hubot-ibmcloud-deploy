@@ -23,13 +23,13 @@ If you are new to Hubot visit the [getting started](https://hubot.github.com/doc
 2. Install this package via `npm install hubot-ibmcloud-deploy --save`
 3. Add `hubot-ibmcloud-deploy` to your `external-scripts.json`
 4. Add the necessary environment variables:
-```
-HUBOT_BLUEMIX_API=<Bluemix API URL>
-HUBOT_BLUEMIX_ORG=<Bluemix Organization>
-HUBOT_BLUEMIX_SPACE=<Bluemix space>
-HUBOT_BLUEMIX_USER=<Bluemix User ID>
-HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
-```
+
+        HUBOT_BLUEMIX_API=<Bluemix API URL>
+        HUBOT_BLUEMIX_ORG=<Bluemix Organization>
+        HUBOT_BLUEMIX_SPACE=<Bluemix space>
+        HUBOT_BLUEMIX_USER=<Bluemix User ID>
+        HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
+
 5. Start up your bot & off to the races!
 
 ## Commands
@@ -57,20 +57,20 @@ Please refer to the [CONTRIBUTING.md](https://github.com/ibm-cloud-solutions/hub
 
 1. Create `config` folder in root of this project.
 2. Create `env` in the `config` folder, with the following contents:
-```
-export HUBOT_BLUEMIX_API=<Bluemix API URL>
-export HUBOT_BLUEMIX_ORG=<Bluemix Organization>
-export HUBOT_BLUEMIX_SPACE=<Bluemix space>
-export HUBOT_BLUEMIX_USER=<Bluemix User ID>
-export HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
-```
+
+        export HUBOT_BLUEMIX_API=<Bluemix API URL>
+        export HUBOT_BLUEMIX_ORG=<Bluemix Organization>
+        export HUBOT_BLUEMIX_SPACE=<Bluemix space>
+        export HUBOT_BLUEMIX_USER=<Bluemix User ID>
+        export HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
+
 3. In order to view content in chat clients you will need to add `hubot-ibmcloud-formatter` to your `external-scripts.json` file. Additionally, if you want to use `hubot-help` to make sure your command documentation is correct. Create `external-scripts.json` in the root of this project, with the following contents:
-```
-[
-	"hubot-help",
-	"hubot-ibmcloud-formatter"
-]
-```
+
+        [
+          "hubot-help",
+          "hubot-ibmcloud-formatter"
+        ]
+
 4. Lastly, run `npm install` to obtain all the dependent node modules.
 
 ### Running Hubot with Adapters
