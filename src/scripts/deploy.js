@@ -95,9 +95,8 @@ module.exports = function(robot) {
 				let message = i18n.__('general.awesome');
 				robot.emit('ibmcloud.formatter', { response: res, message: message});
 				let prompt = i18n.__('github.deploy.prompt.name');
-				utils.getExpectedResponse(res, robot, switchBoard, prompt, /(.*)\s+(.*)/i).then((registerRes) => {
+				utils.getExpectedResponse(res, robot, switchBoard, prompt, /(.+\/.+)\s(.+)/i).then((registerRes) => {
 					const entry = sortRegisterInput(registerRes.match[1], registerRes.match[2]);
-
 					if (!entry) {
 						let message = i18n.__('github.deploy.repo.invalid');
 						robot.emit('ibmcloud.formatter', { response: res, message: message});
@@ -114,10 +113,9 @@ module.exports = function(robot) {
 
 							robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
 							const activeSpace = cf.activeSpace(robot, res);
-							let channel = (res.message && res.message.rawMessage) ? res.message.rawMessage.channel : null;
 							cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
 								robot.logger.info(`${TAG}: cf library returned with app info for ${entry.app}.`);
-								deploy(entry, channel, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+								deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
 							})
 							.catch((err) => {
 								robot.logger.error(`${TAG}: An error occurred.`);
@@ -150,7 +148,7 @@ module.exports = function(robot) {
 					robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${chosenApp}.`);
 					cf.Apps.getApp(chosenApp, activeSpace.guid).then((result) => {
 						robot.logger.info(`${TAG}: cf library returned with app info for  ${chosenApp}.`);
-						deploy({ app: chosenApp, url: apps[app] }, res.message.rawMessage.channel, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+						deploy({ app: chosenApp, url: apps[app] }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
 					})
 					.catch((err) => {
 						robot.logger.error(`${TAG}: An error occurred.`);
@@ -191,11 +189,10 @@ module.exports = function(robot) {
 					message = i18n.__('github.deploy.in.progress', name, input);
 					robot.emit('ibmcloud.formatter', { response: res, message: message});
 					const activeSpace = cf.activeSpace(robot, res);
-					let channel = (res.message && res.message.rawMessage) ? res.message.rawMessage.channel : null;
 					robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${name}.`);
 					cf.Apps.getApp(name, activeSpace.guid).then((result) => {
 						robot.logger.info(`${TAG}: cf library returned with app info for  ${name}.`);
-						deploy({ app: name, url: input }, channel, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+						deploy({ app: name, url: input }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
 					})
 					.catch((err) => {
 						robot.logger.error(`${TAG}: An error occurred.`);
@@ -236,11 +233,10 @@ module.exports = function(robot) {
 								let message = i18n.__('github.deploy.in.progress', entry.app, entry.url);
 								robot.emit('ibmcloud.formatter', { response: res, message: message});
 								const activeSpace = cf.activeSpace(robot, res);
-								let channel = (res.message && res.message.rawMessage) ? res.message.rawMessage.channel : null;
 								robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
 								cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
 									robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
-									deploy({ app: input, url: url }, channel, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+									deploy({ app: input, url: url }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
 								})
 								.catch((err) => {
 									robot.logger.error(`${TAG}: An error occurred.`);
@@ -260,7 +256,7 @@ module.exports = function(robot) {
 						robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${app}.`);
 						cf.Apps.getApp(app, activeSpace.guid).then((result) => {
 							robot.logger.info(`${TAG}: cf library returned with app info for  ${app}.`);
-							deploy({ app: app, url: apps[app] }, res.message.rawMessage.channel, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+							deploy({ app: app, url: apps[app] }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
 						})
 						.catch((err) => {
 							robot.logger.error(`${TAG}: An error occurred.`);
@@ -294,7 +290,7 @@ const sortRegisterInput = (input1, input2) => {
 	}
 };
 
-const deploy = (app, room, appGuid, spaceGuid, spaceName, robot, res) => {
+const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 
 	const urlTokens = app.url.split('/');
 	const reponame = urlTokens.pop();
@@ -490,7 +486,7 @@ function processAppDeploy(robot, res, entry){
 		robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
 		cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
 			robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
-			deploy(entry, res.message.rawMessage.channel, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+			deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
 		})
 		.catch((err) => {
 			robot.logger.error(`${TAG}: An error occurred.`);

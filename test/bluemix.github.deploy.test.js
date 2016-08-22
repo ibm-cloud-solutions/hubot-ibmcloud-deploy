@@ -86,8 +86,9 @@ describe('Interacting with Bluemix via Slack', function() {
 				expect(room.messages[5]).to.eql(['hubot', '@mimiron ' + i18n.__('github.deploy.prompt.name')]);
 				return room.user.say('mimiron', '@hubot helloworld helloworld');
 			}).then(() => {
-				expect(room.messages.length).to.eql(8);
-				expect(room.messages[7]).to.eql(['hubot', '@mimiron ' + i18n.__('github.deploy.repo.invalid')]);
+				expect(room.messages.length).to.eql(9);
+				expect(room.messages[7]).to.eql(['hubot', '@mimiron That is not one of the choices. Try again, or type *exit*.']);
+				expect(room.messages[8]).to.eql(['hubot', '@mimiron Give me a GitHub *user/repo* and the *name* of your app.']);
 			});
 		});
 	});

@@ -21,6 +21,7 @@ module.exports = {
 		ghScope.get('/user/helloworld/archive/master.zip')
 			.reply(200, {});
 
-
+		ghScope.get('/normanb/node-helloworld/archive/master.zip')
+			.reply(200, {});
 	}
 };
