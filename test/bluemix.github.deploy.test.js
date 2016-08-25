@@ -251,4 +251,47 @@ describe('Interacting with Bluemix via Slack', function() {
 			});
 		});
 	});
+
+	context('user calls `deploy app` with a zip and it exists', function() {
+		beforeEach(function() {
+			room.robot.brain.set('github-apps', {
+				manifestTest: 'user/manifestTest'
+			});
+		});
+		afterEach(function() {
+			room.robot.brain.remove('github-apps');
+		});
+
+		it('should respond with the apps that it will deploy with zip', function() {
+			return room.user.say('mimiron', '@hubot deploy manifestTest').then(() => {
+				expect(room.messages.length).to.eql(3);
+				expect(room.messages[1][1]).to.be.a('String');
+				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
+				expect(room.messages[2][1]).to.be.a('String');
+				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTest', 'user/manifestTest')}`]);
+			});
+		});
+	});
+
+	context('user calls `deploy app` with a zip for new app', function() {
+		beforeEach(function() {
+			room.robot.brain.set('github-apps', {
+				manifestTestNoApp: 'user/manifestTestNoApp'
+			});
+		});
+		afterEach(function() {
+			room.robot.brain.remove('github-apps');
+		});
+
+		it('should respond with the apps that it will deploy with zip', function() {
+			return room.user.say('mimiron', '@hubot deploy manifestTestNoApp').then(() => {
+				expect(room.messages.length).to.eql(3);
+				expect(room.messages[1][1]).to.be.a('String');
+				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
+				expect(room.messages[2][1]).to.be.a('String');
+				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTestNoApp', 'user/manifestTestNoApp')}`]);
+			});
+		});
+	});
+
 });
