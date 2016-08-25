@@ -411,7 +411,7 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 										domain_guid: applicationDomainGuid,
 										space_guid: spaceGuid};
 									cf.Routes.add(routeOptions).then((result) => {
-										console.log('Route Creation Result' + JSON.stringify(result));
+										robot.logger.info(`${TAG}: Binding route with guid ${result.metadata.guid} to application ${app.app}`);
 										cf.Apps.associateRoute(appInfo.metadata.guid, result.metadata.guid);
 									})
 									.catch((err) => {

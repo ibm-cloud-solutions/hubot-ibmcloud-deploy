@@ -36,7 +36,7 @@
    "github.deploy.app.complete": "Deployment of application *%s* is complete and the app has been started.",
    "github.deploy.app.unknown": "Deployment status of application *%s* is unknown at this time. Check the status of the application and logs for further information.",
    "github.deploy.error": "A deployment error occurred for app *%s*: %s.",
-	 "github.deploy.manifest.error": "Invalid manifest.yml file for app *%s*.",
+   "github.deploy.manifest.error": "Invalid manifest.yml file for app *%s*.",
 
    "help.github.deploy": "Deployment setup with prompts for application and GitHub URL.",
    "help.github.deploy.app": "Deployment setup for <app>, or prompt you to provide a GitHub URL to deploy to <app>.",
