@@ -23,5 +23,11 @@ module.exports = {
 
 		ghScope.get('/normanb/node-helloworld/archive/master.zip')
 			.reply(200, {});
+
+		ghScope.get('/user/manifestTest/archive/master.zip')
+			.replyWithFile(200, __dirname + '/resources/manifestTest/master.zip');
+
+		ghScope.get('/user/manifestTestNoApp/archive/master.zip')
+				.replyWithFile(200, __dirname + '/resources/manifestTestNoApp/master.zip');
 	}
 };

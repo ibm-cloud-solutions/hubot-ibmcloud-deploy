@@ -23,6 +23,8 @@ const helloWorld = 'helloworld';
 const nodeHelloWorld = 'node-helloworld';
 const app1 = 'app1';
 const normanRepo = 'normanb';
+const manifestTest = 'manifestTest';
+const manifestTestNoApp = 'manifestTestNoApp';
 
 const githubEndpoint = 'https://api.github.com';
 
@@ -98,6 +100,15 @@ module.exports = {
 			.reply(200, {resources: [{metadata: {guid: 'abc123'}}]});
 		cfScope.get(`/${cfVersion}/apps?q=name%3A${app1}%3Bspace_guid%3AtestSpaceGuid`)
 			.reply(200, {resources: [{metadata: {guid: 'abc123'}}]});
+		cfScope.get(`/${cfVersion}/apps?q=name%3A${manifestTest}%3Bspace_guid%3AtestSpaceGuid`)
+				.reply(200, {resources: [{metadata: {guid: 'abc123'}}]});
+		cfScope.put(`/${cfVersion}/apps/abc123/bits?guid=abc123&async=false`)
+						.reply(201, ['2016-08-24T14:10:50-04:00']);
+
+		cfScope.get(`/${cfVersion}/apps?q=name%3A${manifestTestNoApp}%3Bspace_guid%3AtestSpaceGuid`)
+				.reply(200, {resources: []});
+		cfScope.put(`/${cfVersion}/apps/abc123/bits?guid=abc123&async=false`)
+						.reply(201, ['2016-08-24T14:10:50-04:00']);
 
 		githubScope.post(`/repos/${normanRepo}/${nodeHelloWorld}/deployments`)
 			.reply(200, {id: 1122});
@@ -109,6 +120,11 @@ module.exports = {
 		githubScope.post(`/repos/user/${helloWorld}/deployments`)
 			.reply(200, {id: 1122});
 		githubScope.get(`/repos/user/${helloWorld}/deployments/1122/statuses`)
+			.reply(200, {});
+
+		githubScope.post(`/repos/user/${manifestTest}/deployments`)
+			.reply(200, {id: 1122});
+		githubScope.get(`/repos/user/${manifestTest}/deployments/1122/statuses`)
 			.reply(200, {});
 
 		// http://apidocs.cloudfoundry.org/217/apps/updating_an_app.html
@@ -136,6 +152,5 @@ module.exports = {
 
 		cfScope.post('/uaa/oauth/token')
 			.reply(200, testResources.creds);
-
 	}
 };

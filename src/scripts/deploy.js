@@ -23,6 +23,7 @@ const os = require('os');
 const AdmZip = require('adm-zip');
 const fs = require('fs');
 const path = require('path');
+const YAML = require('yamljs');
 
 const TAG = path.basename(__filename);
 
@@ -298,6 +299,15 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 	let domain = '';
 	let appZip;
 	let applicationGuid;
+	let temp = os.tmpdir();
+	let now = Date.now();
+	let deploymentDir = `${temp}/${now}`;
+	let filename = `${deploymentDir}/${reponame}_${now}.zip`;
+	let applicationDomain;
+	let applicationHost;
+	let applicationDomainGuid;
+	let jsonManifest = {};
+
 	// handle domain
 	if (process.env.HUBOT_GITHUB_DOMAIN) {
 		domain = process.env.HUBOT_GITHUB_DOMAIN.replace(/^https?:\/\//, '');
@@ -317,11 +327,46 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 	}).then((zip) => {
 		robot.logger.info(`${TAG}: Application zip created for ${app.app}.`);
 		appZip = zip;
+
+		fs.mkdirSync(deploymentDir);
+		appZip.writeZip(filename);
+
+		//	reload the file to initialize the appZip object with data.
+		appZip = new AdmZip(filename);
+		let ymlString = appZip.readAsText('manifest.yml');
+		if (ymlString !== '') {
+			robot.logger.info(`${TAG}: using manifest.yml found in given repo for ${app.app}.`);
+			fs.writeFileSync(deploymentDir + '/manifest.yml', ymlString);
+			jsonManifest = YAML.load(deploymentDir + '/manifest.yml');
+		}
+
 		if (!appGuid){
 			let appOptions = {
 				name: app.app,
 				space_guid: spaceGuid
 			};
+
+			if (jsonManifest.applications) {
+				if (jsonManifest.applications[0].memory) {
+					appOptions.memory = getValueInMB(jsonManifest.applications[0].memory, robot);
+				}
+				if (jsonManifest.applications[0].disk_quota) {
+					appOptions.disk_quota = getValueInMB(jsonManifest.applications[0].disk_quota, robot);
+				}
+				if (jsonManifest.applications[0].instances) {
+					appOptions.instances = jsonManifest.applications[0].instances;
+				}
+				if (jsonManifest.applications[0].env) {
+					appOptions.environment_json = jsonManifest.applications[0].env;
+				}
+				if (jsonManifest.applications[0].domainx) {
+					applicationDomain = jsonManifest.applications[0].domain;
+				}
+				if (jsonManifest.applications[0].host) {
+					applicationHost = jsonManifest.applications[0].host;
+				}
+			}
+
 			robot.logger.info(`${TAG}: Application ${app.app} does not yet exist, using cf library to make an asynch call to create the app.`);
 			let message = i18n.__('github.deploy.create.app', app.app);
 			robot.emit('ibmcloud.formatter', { response: res, message: message});
@@ -340,6 +385,51 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 			else {
 				robot.logger.info(`${TAG}: Application ${app.app} was created with guid ${appInfo.metadata.guid}.`);
 				if (appInfo && appInfo.metadata && appInfo.metadata.guid) {
+					cf.Domains.getSharedDomains().then((result) => {
+						if (applicationDomain) {
+							result.resources.some((resource) => {
+								if (resource.entity.name === applicationDomain) {
+									applicationDomainGuid = resource.metadata.guid;
+								}
+							});
+						}
+						else {
+							applicationDomainGuid = result.resources[0].metadata.guid;
+						}
+						if (applicationHost) {
+							robot.logger.info(`${TAG}: Using domain ${applicationDomainGuid} for application ${app.app}`);
+							cf.Routes.getRoutes({q: `host:${applicationHost};domain_guid:${applicationDomainGuid}` }).then((result) => {
+								const found = result.resources.some((resource) => {
+									if (resource.entity.host === applicationHost) {
+										cf.Apps.associateRoute(appInfo.metadata.guid, resource.metadata.guid);
+										return true;
+									}
+								});
+								if (!found) {
+									let routeOptions = {
+										host: applicationHost,
+										domain_guid: applicationDomainGuid,
+										space_guid: spaceGuid};
+									cf.Routes.add(routeOptions).then((result) => {
+										console.log('Route Creation Result' + JSON.stringify(result));
+										cf.Apps.associateRoute(appInfo.metadata.guid, result.metadata.guid);
+									})
+									.catch((err) => {
+										robot.logger.error(`${TAG}: An error occurred creating route.`);
+										robot.logger.error(err);
+									});
+								};
+							})
+							.catch((err) => {
+								robot.logger.error(`${TAG}: An error occurred getting Route.`);
+								robot.logger.error(err);
+							});
+						}
+					})
+					.catch((err) => {
+						robot.logger.error(`${TAG}: An error occurred getting domains.`);
+						robot.logger.error(err);
+					});
 					resolve(appInfo.metadata.guid);
 				}
 				else {
@@ -349,15 +439,8 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 			}
 		});
 	}).then((guid) => {
-		let temp = os.tmpdir();
-		let now = Date.now();
-		let deploymentDir = `${temp}/${now}`;
-		let filename = `${deploymentDir}/${reponame}_${now}.zip`;
 		applicationGuid = guid;
 		if (appZip) {
-			fs.mkdirSync(deploymentDir);
-			appZip.writeZip(filename);
-
 			let message = i18n.__('github.deploy.uploading.app', app.app);
 			robot.emit('ibmcloud.formatter', { response: res, message: message});
 			robot.logger.info(`${TAG}: Application ${app.app} will be uploaded using a cf library asynch method from ${filename}.`);
@@ -431,6 +514,23 @@ const getUserRepo = (robot, domain, repoowner, reponame, branch) => {
 	return asyncGet(robot, url);
 };
 
+const getValueInMB = (input, robot) => {
+	let valueInMB = 0;
+	let numbers = input.match(/\d+/)[0];
+	var lastChar = input.substr(input.length - 1);
+	switch (lastChar) {
+	case 'G':
+		valueInMB = numbers * 1024;
+		break;
+	case 'M':
+		valueInMB = numbers;
+		break;
+	default:
+		robot.logger.info(`${TAG}: Invalid unit in value, assuming M.`);
+		valueInMB = numbers;
+	}
+	return parseInt(valueInMB, 10);
+};
 
 function restructureZipAsync(buf) {
 	// TODO use async zip functions
