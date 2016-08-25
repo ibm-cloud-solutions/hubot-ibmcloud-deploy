@@ -3,7 +3,7 @@
   "version": "0.0.18",
   "description": "GitHub Project Deployment to IBM Cloud for hubot",
   "main": "index.js",
-  "respository": {
+  "repository": {
     "url": "https://github.com/ibm-cloud-solutions/hubot-ibmcloud-deploy",
     "type": "git"
   },
