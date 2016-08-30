@@ -13,7 +13,7 @@ const mockUtils = require('./mock.utils.cf.js');
 const mockCFUtils = require('./mock.utils.cf.js');
 const mockESUtils = require('./mock.utils.es.js');
 
-var i18n = new (require('i18n-2'))({
+const i18n = new (require('i18n-2'))({
 	locales: ['en'],
 	extension: '.json',
 	// Add more languages to the list of locales when the files are created.
@@ -60,7 +60,7 @@ describe('Interacting with Deploy via NLS', function() {
 				done();
 			});
 
-			var res = { message: {text: 'application deployment help', user: {id: 'anId'}}, response: room };
+			const res = { message: {text: 'application deployment help', user: {id: 'anId'}}, response: room };
 			room.robot.emit('github.deploy.help', res, {});
 		});
 	});
@@ -73,7 +73,7 @@ describe('Interacting with Deploy via NLS', function() {
 				done();
 			});
 
-			var res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room };
+			const res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room };
 			room.robot.emit('github.deploy', res, {appname: 'node-helloworld', url: 'normanb/node-helloworld'});
 		});
 	});
@@ -86,7 +86,7 @@ describe('Interacting with Deploy via NLS', function() {
 				done();
 			});
 
-			var res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room };
+			const res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room };
 			room.robot.emit('github.deploy', res, {url: 'normanb/node-helloworld'});
 		});
 	});
@@ -99,7 +99,7 @@ describe('Interacting with Deploy via NLS', function() {
 				done();
 			});
 
-			var res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room };
+			const res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room };
 			room.robot.emit('github.deploy', res, {appname: 'node-helloworld'});
 		});
 	});
