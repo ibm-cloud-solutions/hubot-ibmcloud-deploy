@@ -529,7 +529,7 @@ const getUserRepo = (robot, domain, repoowner, reponame, branch) => {
 const getValueInMB = (input, robot) => {
 	let valueInMB = 0;
 	let numbers = input.match(/\d+/)[0];
-	var lastChar = input.substr(input.length - 1);
+	const lastChar = input.substr(input.length - 1);
 	switch (lastChar) {
 	case 'G':
 		valueInMB = numbers * 1024;
@@ -553,7 +553,7 @@ function restructureZipAsync(buf) {
 
 		let newZip = AdmZip();
 		// skip top folder
-		for (var i = 1; i < entries.length; i++){
+		for (let i = 1; i < entries.length; i++){
 			let name = entries[i].entryName.substring(topFolder.length);
 			let data = entries[i].getData();
 			newZip.addFile(name, data);
