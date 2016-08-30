@@ -346,6 +346,8 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 				space_guid: spaceGuid
 			};
 
+			applicationHost = app.app;
+
 			if (jsonManifest.applications) {
 				if (jsonManifest.applications[0].memory) {
 					appOptions.memory = getValueInMB(jsonManifest.applications[0].memory, robot);
@@ -359,11 +361,17 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 				if (jsonManifest.applications[0].env) {
 					appOptions.environment_json = jsonManifest.applications[0].env;
 				}
-				if (jsonManifest.applications[0].domainx) {
+				if (jsonManifest.applications[0].domain) {
 					applicationDomain = jsonManifest.applications[0].domain;
 				}
 				if (jsonManifest.applications[0].host) {
 					applicationHost = jsonManifest.applications[0].host;
+				}
+				if (jsonManifest.applications[0].buildpack) {
+					appOptions.buildpack = jsonManifest.applications[0].buildpack;
+				}
+				if (jsonManifest.applications[0].command) {
+					appOptions.command = jsonManifest.applications[0].command;
 				}
 			}
 
@@ -415,8 +423,8 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 										cf.Apps.associateRoute(appInfo.metadata.guid, result.metadata.guid);
 									})
 									.catch((err) => {
-										robot.logger.error(`${TAG}: An error occurred creating route.`);
-										robot.logger.error(err);
+										let message = i18n.__('github.deploy.route.error', JSON.parse(err).description);
+										robot.emit('ibmcloud.formatter', { response: res, message: message});
 									});
 								};
 							})
@@ -441,7 +449,7 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 	}).then((guid) => {
 		applicationGuid = guid;
 		if (appZip) {
-			let message = i18n.__('github.deploy.uploading.app', app.app);
+			let message = i18n.__('github.deploy.uploading.app', app.app, process.env.HUBOT_BLUEMIX_ORG, spaceName);
 			robot.emit('ibmcloud.formatter', { response: res, message: message});
 			robot.logger.info(`${TAG}: Application ${app.app} will be uploaded using a cf library asynch method from ${filename}.`);
 			return cf.Apps.upload(guid, filename, false);
@@ -476,7 +484,11 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 				}
 				robot.logger.info(`${TAG}: Obtain app summary for ${app.app}: ${appSummaryStr}.`);
 				if (result && result.state === 'STARTED') {
-					let message = i18n.__('github.deploy.app.complete', app.app);
+					let appRoute = '';
+					if (appSummary.routes[0]) {
+						appRoute = 'http://' + appSummary.routes[0].host + '.' + appSummary.routes[0].domain.name;
+					}
+					let message = i18n.__('github.deploy.app.complete', app.app, process.env.HUBOT_BLUEMIX_ORG, spaceName, appRoute);
 					robot.emit('ibmcloud.formatter', { response: res, message: message});
 				}
 				else {
