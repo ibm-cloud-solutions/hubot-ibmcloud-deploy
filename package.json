@@ -1,6 +1,6 @@
 {
   "name": "hubot-ibmcloud-deploy",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "GitHub Project Deployment to IBM Cloud for hubot",
   "main": "index.js",
   "repository": {
@@ -45,10 +45,10 @@
   },
   "peerDependencies": {
     "hubot": "^2.19.0",
-	"hubot-cf-convenience": ">=0.0.13",
+    "hubot-cf-convenience": ">=0.0.13",
     "hubot-conversation": "^1.1.1",
     "hubot-ibmcloud-activity-emitter": ">=0.0.3",
-	"hubot-ibmcloud-cognitive-lib": ">=0.0.40",
+    "hubot-ibmcloud-cognitive-lib": ">=0.0.40",
     "hubot-ibmcloud-utils": ">=0.0.14",
     "i18n-2": "*",
     "lodash": "^4.13.1",
