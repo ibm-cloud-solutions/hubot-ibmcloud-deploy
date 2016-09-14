@@ -293,9 +293,13 @@ const sortRegisterInput = (input1, input2) => {
 
 const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 
-	const urlTokens = app.url.split('/');
+	const regex = /(.*)\/tree\/(.*)/;
+	const match = regex.exec(app.url);
+	const urlTokens = match !== null ? match[1] : app.url.split('/');
+	const branch = match !== null ? match[2] : undefined;
 	const reponame = urlTokens.pop();
 	const repoowner = urlTokens.pop();
+
 	let domain = '';
 	let appZip;
 	let applicationGuid;
@@ -317,7 +321,7 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 	}
 
 	robot.logger.info(`${TAG}: Beginning deployment steps for ${app.app} ...`);
-	getUserRepo(robot, domain, repoowner, reponame)
+	getUserRepo(robot, domain, repoowner, reponame, branch)
 	.then((bf) => {
 		let message = i18n.__('github.deploy.obtaining.zip', app.app);
 		robot.emit('ibmcloud.formatter', { response: res, message: message});
