@@ -9,7 +9,7 @@
 
    "github.deploy.app.select": "Which app would you like to deploy?  Here are the ones I know about:",
    "github.deploy.failure": "Sorry, I tried my best.",
-   "github.deploy.in.progress": "Deploying *%s* from master branch of %s.",
+   "github.deploy.in.progress": "Deploying *%s* from *%s* branch of %s.",
    "github.deploy.in.progress.matching": "Deploying matching apps.",
    "github.deploy.started": "Deployment *%s* has been started.",
    "github.deploy.name.invalid": "You didn't give me a valid app name.  I would love to do something with this, but I cannot.",
@@ -38,6 +38,7 @@
    "github.deploy.error": "A deployment error occurred for app *%s*: %s.",
    "github.deploy.manifest.error": "Invalid manifest.yml file for app *%s*.",
    "github.deploy.route.error": "Error adding route to the application: *%s*.",
+	 "github.deploy.branch.prompt": "Which *branch* would you like to deploy?",
 
    "help.github.deploy": "Deployment setup with prompts for application and GitHub URL.",
    "help.github.deploy.app": "Deployment setup for <app>, or prompt you to provide a GitHub URL to deploy to <app>.",
