@@ -30,16 +30,19 @@ If you are new to Hubot visit the [getting started](https://hubot.github.com/doc
         HUBOT_BLUEMIX_SPACE=<Bluemix space>
         HUBOT_BLUEMIX_USER=<Bluemix User ID>
         HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
+        HUBOT_GITHUB_TOKEN=<GitHub personal access token> (optional)
+		HUBOT_GITHUB_DOMAIN=<GitHub domain, omit for public GitHub> (optional)
 
 5. Start up your bot & off to the races!
 
 ## Commands
 
-- `hubot deploy` - Deployment setup with prompts for application and GitHub URL.
-- `hubot deploy <app>` - Deployment setup for , or prompt you to provide a GitHub URL to deploy to .
-- `hubot deploy <url>` - Deployment setup for and prompt you for the Bluemix application name.
-- `hubot deploy <app> <url>` - Deployment of as on Bluemix.
-- `hubot deploy help`- Show available deploy commands.
+- `hubot deploy` - Deployment setup with prompts for application, GitHub URL and branch.
+- `hubot deploy <app>` - Deployment setup for app, or prompt you to provide a GitHub URL and branch to depoy to.
+- `hubot deploy <url>` - Deployment setup for url and prompt you for the Bluemix application name and branch.
+- `hubot deploy <app> <url>` - Deployment of app with url, prompt for branch if not provided.
+- `hubot deploy help` - Show available commands in the deploy category.
+
 
 Your github repository should contain a `manifest.yml` that describes the deployment of the application.
 More information about application deployment and manifest files can be read here: https://console.ng.bluemix.net/docs/manageapps/depapps.html#deployingapps
@@ -68,6 +71,8 @@ Please refer to the [CONTRIBUTING.md](https://github.com/ibm-cloud-solutions/hub
         export HUBOT_BLUEMIX_SPACE=<Bluemix space>
         export HUBOT_BLUEMIX_USER=<Bluemix User ID>
         export HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
+        export HUBOT_GITHUB_TOKEN=<GitHub personal access token> (optional)
+		export HUBOT_GITHUB_DOMAIN=<GitHub domain, omit for public GitHub> (optional)
 
 3. In order to view content in chat clients you will need to add `hubot-ibmcloud-formatter` to your `external-scripts.json` file. Additionally, if you want to use `hubot-help` to make sure your command documentation is correct. Create `external-scripts.json` in the root of this project, with the following contents:
 
