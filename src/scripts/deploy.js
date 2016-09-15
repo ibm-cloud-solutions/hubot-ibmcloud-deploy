@@ -7,10 +7,10 @@
 //	 HUBOT_BLUEMIX_SPACE Bluemix space
 //	 HUBOT_BLUEMIX_USER Bluemix User ID
 //	 HUBOT_BLUEMIX_PASSWORD Password for the Bluemix User
-//   HUBOT_GITHUB_TOKEN <optional> Github API Auth token
+//   	 HUBOT_GITHUB_TOKEN <optional> Github API Auth token
 //
 // Commands:
-//  hubot deploy help - Show available commands in the deploy category.
+//  	hubot deploy help - Show available commands in the deploy category.
 //	hubot deploy - Deployment setup with prompts for application, GitHub URL and branch.
 //	hubot deploy <app> - Deployment setup for app, or prompt you to provide a GitHub URL and branch to depoy to.
 //	hubot deploy <url> - Deployment setup for url and prompt you for the Bluemix application name and branch.
@@ -306,17 +306,13 @@ const sortRegisterInput = (input1, input2) => {
 };
 
 const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
-	const branch = app.branch;
-	const reponame = app.repo;
-	const repoowner = app.user;
-
 	let domain = '';
 	let appZip;
 	let applicationGuid;
 	let temp = os.tmpdir();
 	let now = Date.now();
 	let deploymentDir = `${temp}/${now}`;
-	let filename = `${deploymentDir}/${reponame}_${now}.zip`;
+	let filename = `${deploymentDir}/${app.repo}_${now}.zip`;
 	let applicationDomain;
 	let applicationHost;
 	let applicationDomainGuid;
@@ -331,7 +327,7 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 	}
 
 	robot.logger.info(`${TAG}: Beginning deployment steps for ${app.app} ...`);
-	getUserRepo(robot, domain, repoowner, reponame, branch)
+	getUserRepo(robot, domain, app.user, app.repo, app.branch)
 	.then((bf) => {
 		let message = i18n.__('github.deploy.obtaining.zip', app.app);
 		robot.emit('ibmcloud.formatter', { response: res, message: message});

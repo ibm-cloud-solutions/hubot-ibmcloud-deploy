@@ -31,7 +31,7 @@ If you are new to Hubot visit the [getting started](https://hubot.github.com/doc
         HUBOT_BLUEMIX_USER=<Bluemix User ID>
         HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
         HUBOT_GITHUB_TOKEN=<GitHub personal access token> (optional)
-		HUBOT_GITHUB_DOMAIN=<GitHub domain, omit for public GitHub> (optional)
+	HUBOT_GITHUB_DOMAIN=<GitHub domain, omit for public GitHub> (optional)
 
 5. Start up your bot & off to the races!
 
@@ -72,7 +72,7 @@ Please refer to the [CONTRIBUTING.md](https://github.com/ibm-cloud-solutions/hub
         export HUBOT_BLUEMIX_USER=<Bluemix User ID>
         export HUBOT_BLUEMIX_PASSWORD=<Password for the Bluemix use>
         export HUBOT_GITHUB_TOKEN=<GitHub personal access token> (optional)
-		export HUBOT_GITHUB_DOMAIN=<GitHub domain, omit for public GitHub> (optional)
+	export HUBOT_GITHUB_DOMAIN=<GitHub domain, omit for public GitHub> (optional)
 
 3. In order to view content in chat clients you will need to add `hubot-ibmcloud-formatter` to your `external-scripts.json` file. Additionally, if you want to use `hubot-help` to make sure your command documentation is correct. Create `external-scripts.json` in the root of this project, with the following contents:
 
