@@ -65,7 +65,8 @@
   ],
   "dependencies": {
     "adm-zip": "^0.4.7",
-    "yamljs": "^0.2.8"
+    "yamljs": "^0.2.8",
+		"github": "^3.0.0"
   },
   "config": {
     "commitizen": {

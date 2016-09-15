@@ -7,11 +7,18 @@
 //	 HUBOT_BLUEMIX_SPACE Bluemix space
 //	 HUBOT_BLUEMIX_USER Bluemix User ID
 //	 HUBOT_BLUEMIX_PASSWORD Password for the Bluemix User
+//   HUBOT_GITHUB_TOKEN <optional> Github API Auth token
 //
 // Commands:
-//   hubot deploy help - Show available commands in the deploy category.
+//  hubot deploy help - Show available commands in the deploy category.
+//	hubot deploy - Deployment setup with prompts for application, GitHub URL and branch.
+//	hubot deploy <app> - Deployment setup for app, or prompt you to provide a GitHub URL and branch to depoy to.
+//	hubot deploy <url> - Deployment setup for url and prompt you for the Bluemix application name and branch.
+//	hubot deploy <app> <url> - Deployment of app with url, prompt for branch if not provided.
+//
 // Author:
 //	aeweidne
+//	reicruz
 //
 'use strict';
 
@@ -24,6 +31,7 @@ const AdmZip = require('adm-zip');
 const fs = require('fs');
 const path = require('path');
 const YAML = require('yamljs');
+const github = require('../lib/github');
 
 const TAG = path.basename(__filename);
 
@@ -304,10 +312,9 @@ const sortRegisterInput = (input1, input2) => {
 };
 
 const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
-	const urlTokens = app.url.split('/');
 	const branch = app.branch;
-	const reponame = urlTokens.pop();
-	const repoowner = urlTokens.pop();
+	const reponame = app.repo;
+	const repoowner = app.user;
 
 	let domain = '';
 	let appZip;
@@ -628,14 +635,48 @@ function getEntry(robot, res, switchBoard, entry) {
 		entry.branch = match !== null ? match[2] : undefined;
 		entry.url = match !== null ? match[1] : entry.url;
 
+		const urlTokens = entry.url.split('/');
+		entry.repo = urlTokens.pop();
+		entry.user = urlTokens.pop();
+
 		if (entry.branch) {
 			resolve(entry);
 		}
 		else {
-			let prompt = i18n.__('github.deploy.branch.prompt');
-			utils.getExpectedResponse(res, robot, switchBoard, prompt, /(?:\S+\s+){1}(\S+)/i).then((branchRes) => {
-				entry.branch = branchRes.match[1];
-				resolve(entry);
+			github.repos.getBranches({
+				user: entry.user,
+				repo: entry.repo
+			}, (err, branches) => {
+				if (!err) {
+					if (branches.length === 1) {
+						entry.branch = branches[0].name;
+						resolve(entry);
+					}
+					else {
+						const regex = utils.generateRegExpForNumberedList(branches.length + 1);
+						let prompt = i18n.__('github.deploy.branch.prompt') + '\n';
+						for (let i = 0; i < branches.length; i++) {
+							prompt += `(${i + 1})  ${branches[i].name}\n`;
+						}
+						utils.getExpectedResponse(res, robot, switchBoard, prompt, regex).then((result) => {
+							let response = result.match[1];
+							let resNum = parseInt(response, 10);
+							entry.branch = branches[resNum - 1].name;
+							resolve(entry);
+						}).catch((err) => {
+							reject(err);
+						});
+					}
+				}
+				else {
+					let prompt = i18n.__('github.deploy.branch.prompt');
+					utils.getExpectedResponse(res, robot, switchBoard, prompt, /(?:\S+\s+){1}(\S+)/i).then((branchRes) => {
+						entry.branch = branchRes.match[1];
+						resolve(entry);
+					}).catch((err) => {
+						reject(err);
+					});
+				}
 			});
 		}
 	});
