@@ -1,0 +1,27 @@
+{
+	"multipleBranches": [
+		{
+			"name": "master",
+			"commit": {
+				"sha": "mockCommit",
+		      		"url": "mockURL"
+			}
+		},
+		{
+			"name": "test-branch",
+			"commit": {
+				"sha": "mockCommit",
+				"url": "mockURL"
+			}
+		}
+	],
+	"oneBranch": [
+		{
+			"name": "master",
+			"commit": {
+				"sha": "mockCommit",
+				"url": "mockURL"
+			}
+		}
+	]
+}

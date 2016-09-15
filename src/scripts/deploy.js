@@ -7,11 +7,18 @@
 //	 HUBOT_BLUEMIX_SPACE Bluemix space
 //	 HUBOT_BLUEMIX_USER Bluemix User ID
 //	 HUBOT_BLUEMIX_PASSWORD Password for the Bluemix User
+//   	 HUBOT_GITHUB_TOKEN <optional> Github API Auth token
 //
 // Commands:
-//   hubot deploy help - Show available commands in the deploy category.
+//  	hubot deploy help - Show available commands in the deploy category.
+//	hubot deploy - Deployment setup with prompts for application, GitHub URL and branch.
+//	hubot deploy <app> - Deployment setup for app, or prompt you to provide a GitHub URL and branch to depoy to.
+//	hubot deploy <url> - Deployment setup for url and prompt you for the Bluemix application name and branch.
+//	hubot deploy <app> <url> - Deployment of app with url, prompt for branch if not provided.
+//
 // Author:
 //	aeweidne
+//	reicruz
 //
 'use strict';
 
@@ -24,6 +31,7 @@ const AdmZip = require('adm-zip');
 const fs = require('fs');
 const path = require('path');
 const YAML = require('yamljs');
+const github = require('../lib/github');
 
 const TAG = path.basename(__filename);
 
@@ -59,7 +67,7 @@ module.exports = function(robot) {
 		if (parameters && parameters.appname) {
 			if (parameters && parameters.url) {
 				const entry = { app: parameters.appname, url: parameters.url };
-				processAppDeploy(robot, res, entry);
+				processAppDeploy(robot, res, switchBoard, entry);
 			}
 			else {
 				robot.logger.error(`${TAG}: Error extracting repository from text [${res.message.text}].`);
@@ -98,15 +106,11 @@ module.exports = function(robot) {
 				let prompt = i18n.__('github.deploy.prompt.name');
 				utils.getExpectedResponse(res, robot, switchBoard, prompt, /(.+\/.+)\s(.+)/i).then((registerRes) => {
 					const entry = sortRegisterInput(registerRes.match[1], registerRes.match[2]);
-					if (!entry) {
-						let message = i18n.__('github.deploy.repo.invalid');
-						robot.emit('ibmcloud.formatter', { response: res, message: message});
-					}
-					else {
-						let prompt = i18n.__('github.deploy.name.confirm', entry.app, entry.url);
-						let negativeResponse = i18n.__('github.deploy.failure');
-						utils.getConfirmedResponse(res, switchBoard, prompt, negativeResponse).then((dialogResult) => {
-							let message = i18n.__('github.deploy.in.progress', entry.app, entry.url);
+					let prompt = i18n.__('github.deploy.name.confirm', entry.app, entry.url);
+					let negativeResponse = i18n.__('github.deploy.failure');
+					utils.getConfirmedResponse(res, switchBoard, prompt, negativeResponse).then((dialogResult) => {
+						getEntry(robot, res, switchBoard, entry).then(entry => {
+							let message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
 							robot.emit('ibmcloud.formatter', { response: res, message: message});
 							apps[entry.app] = entry.url;
 							// update brain
@@ -123,7 +127,7 @@ module.exports = function(robot) {
 								robot.logger.error(err);
 							});
 						});
-					}
+					});
 				});
 			});
 		}
@@ -143,17 +147,20 @@ module.exports = function(robot) {
 				let prompt = i18n.__('github.deploy.app.select');
 				utils.getExpectedResponse(res, robot, switchBoard, prompt, expr).then((response) => {
 					let chosenApp = response.match[1];
-					let message = i18n.__('github.deploy.in.progress', chosenApp, apps[app]);
-					robot.emit('ibmcloud.formatter', { response: res, message: message});
-					const activeSpace = cf.activeSpace(robot, res);
-					robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${chosenApp}.`);
-					cf.Apps.getApp(chosenApp, activeSpace.guid).then((result) => {
-						robot.logger.info(`${TAG}: cf library returned with app info for  ${chosenApp}.`);
-						deploy({ app: chosenApp, url: apps[app] }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
-					})
-					.catch((err) => {
-						robot.logger.error(`${TAG}: An error occurred.`);
-						robot.logger.error(err);
+					const entry = {app: chosenApp, url: apps[chosenApp]};
+					getEntry(robot, res, switchBoard, entry).then(entry => {
+						let message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
+						robot.emit('ibmcloud.formatter', { response: res, message: message});
+						const activeSpace = cf.activeSpace(robot, res);
+						robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
+						cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
+							robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
+							deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+						})
+						.catch((err) => {
+							robot.logger.error(`${TAG}: An error occurred.`);
+							robot.logger.error(err);
+						});
 					});
 				});
 
@@ -181,23 +188,25 @@ module.exports = function(robot) {
 			utils.getConfirmedResponse(res, switchBoard, prompt, negativeResponse).then((dialogResult) => {
 				let prompt = i18n.__('github.deploy.name.prompt');
 				utils.getExpectedResponse(res, robot, switchBoard, prompt, /(.*)/i).then((nameRes) => {
-					const name = nameRes.match[1];
-					let message = i18n.__('github.deploy.register.in.progress', name, input);
+					const entry = {app: nameRes.match[1], url: input};
+					let message = i18n.__('github.deploy.register.in.progress', entry.app, entry.url);
 					robot.emit('ibmcloud.formatter', { response: res, message: message});
-					apps[name] = input;
+					apps[entry.app] = entry.url;
 					// update brain
 					robot.brain.set('github-apps', apps);
-					message = i18n.__('github.deploy.in.progress', name, input);
-					robot.emit('ibmcloud.formatter', { response: res, message: message});
-					const activeSpace = cf.activeSpace(robot, res);
-					robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${name}.`);
-					cf.Apps.getApp(name, activeSpace.guid).then((result) => {
-						robot.logger.info(`${TAG}: cf library returned with app info for  ${name}.`);
-						deploy({ app: name, url: input }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
-					})
-					.catch((err) => {
-						robot.logger.error(`${TAG}: An error occurred.`);
-						robot.logger.error(err);
+					getEntry(robot, res, switchBoard, entry).then(entry => {
+						message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
+						robot.emit('ibmcloud.formatter', { response: res, message: message});
+						const activeSpace = cf.activeSpace(robot, res);
+						robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
+						cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
+							robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
+							deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+						})
+						.catch((err) => {
+							robot.logger.error(`${TAG}: An error occurred.`);
+							robot.logger.error(err);
+						});
 					});
 				});
 			});
@@ -231,17 +240,19 @@ module.exports = function(robot) {
 								const entry = { app: input, url: url };
 								// upsert into apps object
 								apps[entry.app] = entry.url;
-								let message = i18n.__('github.deploy.in.progress', entry.app, entry.url);
-								robot.emit('ibmcloud.formatter', { response: res, message: message});
-								const activeSpace = cf.activeSpace(robot, res);
-								robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
-								cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
-									robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
-									deploy({ app: input, url: url }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
-								})
-								.catch((err) => {
-									robot.logger.error(`${TAG}: An error occurred.`);
-									robot.logger.error(err);
+								getEntry(robot, res, switchBoard, entry).then(entry => {
+									let message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
+									robot.emit('ibmcloud.formatter', { response: res, message: message});
+									const activeSpace = cf.activeSpace(robot, res);
+									robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
+									cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
+										robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
+										deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+									})
+									.catch((err) => {
+										robot.logger.error(`${TAG}: An error occurred.`);
+										robot.logger.error(err);
+									});
 								});
 							}
 						});
@@ -251,17 +262,20 @@ module.exports = function(robot) {
 					let message = i18n.__('github.deploy.in.progress.matching');
 					robot.emit('ibmcloud.formatter', { response: res, message: message});
 					matchingApps.forEach((app) => {
-						let message = i18n.__('github.deploy.in.progress', app, apps[app]);
-						robot.emit('ibmcloud.formatter', { response: res, message: message});
-						const activeSpace = cf.activeSpace(robot, res);
-						robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${app}.`);
-						cf.Apps.getApp(app, activeSpace.guid).then((result) => {
-							robot.logger.info(`${TAG}: cf library returned with app info for  ${app}.`);
-							deploy({ app: app, url: apps[app] }, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
-						})
-						.catch((err) => {
-							robot.logger.error(`${TAG}: An error occurred.`);
-							robot.logger.error(err);
+						const entry = {app: app, url: apps[app]};
+						getEntry(robot, res, switchBoard, entry).then(entry => {
+							let message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
+							robot.emit('ibmcloud.formatter', { response: res, message: message});
+							const activeSpace = cf.activeSpace(robot, res);
+							robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
+							cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
+								robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
+								deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+							})
+							.catch((err) => {
+								robot.logger.error(`${TAG}: An error occurred.`);
+								robot.logger.error(err);
+							});
 						});
 					});
 				}
@@ -273,7 +287,7 @@ module.exports = function(robot) {
 		robot.logger.debug(`${TAG}: res.message.text=${res.message.text}.`);
 
 		const entry = sortRegisterInput(res.match[1], res.match[2]);
-		processAppDeploy(robot, res, entry);
+		processAppDeploy(robot, res, switchBoard, entry);
 
 	});
 };
@@ -292,17 +306,13 @@ const sortRegisterInput = (input1, input2) => {
 };
 
 const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
-
-	const urlTokens = app.url.split('/');
-	const reponame = urlTokens.pop();
-	const repoowner = urlTokens.pop();
 	let domain = '';
 	let appZip;
 	let applicationGuid;
 	let temp = os.tmpdir();
 	let now = Date.now();
 	let deploymentDir = `${temp}/${now}`;
-	let filename = `${deploymentDir}/${reponame}_${now}.zip`;
+	let filename = `${deploymentDir}/${app.repo}_${now}.zip`;
 	let applicationDomain;
 	let applicationHost;
 	let applicationDomainGuid;
@@ -317,7 +327,7 @@ const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
 	}
 
 	robot.logger.info(`${TAG}: Beginning deployment steps for ${app.app} ...`);
-	getUserRepo(robot, domain, repoowner, reponame)
+	getUserRepo(robot, domain, app.user, app.repo, app.branch)
 	.then((bf) => {
 		let message = i18n.__('github.deploy.obtaining.zip', app.app);
 		robot.emit('ibmcloud.formatter', { response: res, message: message});
@@ -517,9 +527,6 @@ const printHelp = (res, robot) => {
 
 const getUserRepo = (robot, domain, repoowner, reponame, branch) => {
 	let gitBranch = branch;
-	if (!branch) {
-		gitBranch = 'master';
-	}
 	let url = `https://${domain}/${repoowner}/${reponame}/archive/${gitBranch}.zip`;
 
 	robot.logger.info(`${TAG}: Obtaining application code from  ${url}.`);
@@ -580,7 +587,7 @@ function asyncGet(robot, url) {
 	});
 };
 
-function processAppDeploy(robot, res, entry){
+function processAppDeploy(robot, res, switchBoard, entry){
 	let apps = robot.brain.get('github-apps') || {};
 
 	if (!entry) {
@@ -588,21 +595,76 @@ function processAppDeploy(robot, res, entry){
 		robot.emit('ibmcloud.formatter', { response: res, message: message});
 	}
 	else {
-		// upsert
-		apps[entry.app] = entry.url;
-
-		// get to deployment
-		let message = i18n.__('github.deploy.in.progress', entry.app, entry.url);
-		robot.emit('ibmcloud.formatter', { response: res, message: message});
-		const activeSpace = cf.activeSpace(robot, res);
-		robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
-		cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
-			robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
-			deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
-		})
-		.catch((err) => {
-			robot.logger.error(`${TAG}: An error occurred.`);
-			robot.logger.error(err);
+		getEntry(robot, res, switchBoard, entry).then(entry => {
+			// upsert
+			apps[entry.app] = entry.url;
+			// get to deployment
+			let message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
+			robot.emit('ibmcloud.formatter', { response: res, message: message});
+			const activeSpace = cf.activeSpace(robot, res);
+			robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
+			cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
+				robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
+				deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+			})
+			.catch((err) => {
+				robot.logger.error(`${TAG}: An error occurred.`);
+				robot.logger.error(err);
+			});
 		});
 	}
+}
+
+function getEntry(robot, res, switchBoard, entry) {
+	return new Promise((resolve, reject) => {
+		const regex = /(.*)\/tree\/(.*)/;
+		const match = regex.exec(entry.url);
+		entry.branch = match !== null ? match[2] : undefined;
+		entry.url = match !== null ? match[1] : entry.url;
+
+		const urlTokens = entry.url.split('/');
+		entry.repo = urlTokens.pop();
+		entry.user = urlTokens.pop();
+
+		if (entry.branch) {
+			resolve(entry);
+		}
+		else {
+			github.repos.getBranches({
+				user: entry.user,
+				repo: entry.repo
+			}, (err, branches) => {
+				if (!err) {
+					if (branches.length === 1) {
+						entry.branch = branches[0].name;
+						resolve(entry);
+					}
+					else {
+						const regex = utils.generateRegExpForNumberedList(branches.length + 1);
+						let prompt = i18n.__('github.deploy.branch.prompt') + '\n';
+						for (let i = 0; i < branches.length; i++) {
+							prompt += `(${i + 1})  ${branches[i].name}\n`;
+						}
+						utils.getExpectedResponse(res, robot, switchBoard, prompt, regex).then((result) => {
+							let response = result.match[1];
+							let resNum = parseInt(response, 10);
+							entry.branch = branches[resNum - 1].name;
+							resolve(entry);
+						}).catch((err) => {
+							reject(err);
+						});
+					}
+				}
+				else {
+					let prompt = i18n.__('github.deploy.branch.prompt');
+					utils.getExpectedResponse(res, robot, switchBoard, prompt, /(?:\S+\s+){1}(\S+)/i).then((branchRes) => {
+						entry.branch = branchRes.match[1];
+						resolve(entry);
+					}).catch((err) => {
+						reject(err);
+					});
+				}
+			});
+		}
+	});
 }

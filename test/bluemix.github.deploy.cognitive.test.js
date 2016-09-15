@@ -66,14 +66,20 @@ describe('Interacting with Deploy via NLS', function() {
 	});
 
 	context('user calls `I want to deploy my application`', function() {
+		let replyFn = function(msg) {
+			if (msg.indexOf('Which *branch* would you like to deploy?') >= 0) {
+				return room.user.say('anId', '@hubot master');
+			}
+		};
+
 		it('should respond with the application deploy', function(done) {
 			room.robot.on('ibmcloud.formatter', (event) => {
 				expect(event.message).to.be.a('string');
-				expect(event.message).to.contain(i18n.__('github.deploy.in.progress', 'node-helloworld', 'normanb/node-helloworld'));
+				expect(event.message).to.contain(i18n.__('github.deploy.in.progress', 'node-helloworld', 'master', 'normanb/node-helloworld'));
 				done();
 			});
 
-			const res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room };
+			const res = { message: {text: 'start application deployment', user: {id: 'anId'}}, response: room, reply: replyFn };
 			room.robot.emit('github.deploy', res, {appname: 'node-helloworld', url: 'normanb/node-helloworld'});
 		});
 	});
