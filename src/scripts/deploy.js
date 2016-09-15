@@ -282,7 +282,6 @@ module.exports = function(robot) {
 	});
 
 	robot.respond(/deploy\s+(\S+)\s+(\S+)$/i, {id: 'github.deploy'}, (res) => {
-		console.log("YOU ARE HERE LALALLALALALALA");
 		robot.logger.debug(`${TAG}: res.message.text=${res.message.text}.`);
 
 		const entry = sortRegisterInput(res.match[1], res.match[2]);
@@ -305,9 +304,6 @@ const sortRegisterInput = (input1, input2) => {
 };
 
 const deploy = (app, appGuid, spaceGuid, spaceName, robot, res) => {
-
-	console.log(app);
-
 	const urlTokens = app.url.split('/');
 	const branch = app.branch;
 	const reponame = urlTokens.pop();
@@ -598,7 +594,6 @@ function asyncGet(robot, url) {
 };
 
 function processAppDeploy(robot, res, switchBoard, entry){
-	console.log('AN NOW HERE');
 	let apps = robot.brain.get('github-apps') || {};
 
 	if (!entry) {
