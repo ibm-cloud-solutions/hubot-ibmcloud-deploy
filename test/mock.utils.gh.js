@@ -7,15 +7,22 @@
 'use strict';
 
 const nock = require('nock');
+const path = require('path');
 nock.disableNetConnect();
 nock.enableNetConnect('localhost');
 
-const endpoint = 'https://github.com:443';
+const ghApiEndpoint = 'https://api.github.com';
+const ghEndpoint = 'https://github.com';
+
+const mockBranches = require(path.resolve(__dirname, 'resources', 'mock.branches.json'));
 
 module.exports = {
 
 	setupMockery: function() {
-		let ghScope = nock(endpoint)
+		let ghScope = nock(ghEndpoint)
+			.persist();
+
+		let ghApiScope = nock(ghApiEndpoint)
 			.persist();
 
 		ghScope.get('/user/helloworld/archive/master.zip')
@@ -27,7 +34,19 @@ module.exports = {
 		ghScope.get('/user/manifestTest/archive/master.zip')
 			.replyWithFile(200, __dirname + '/resources/manifestTest/master.zip');
 
+		ghScope.get('/user/manifestTest/archive/master.zip')
+			.replyWithFile(200, __dirname + '/resources/manifestTest/master.zip');
+
 		ghScope.get('/user/manifestTestNoApp/archive/master.zip')
-				.replyWithFile(200, __dirname + '/resources/manifestTestNoApp/master.zip');
+			.replyWithFile(200, __dirname + '/resources/manifestTestNoApp/master.zip');
+
+		ghScope.get('/user/manifestTestMultipleBranches/archive/test-branch.zip')
+			.replyWithFile(200, __dirname + '/resources/manifestTest/master.zip');
+
+		ghApiScope.get('/repos/user/manifestTest/branches')
+			.reply(200, mockBranches.oneBranch);
+
+		ghApiScope.get('/repos/user/manifestTestMultipleBranches/branches')
+			.reply(200, mockBranches.multipleBranches);
 	}
 };

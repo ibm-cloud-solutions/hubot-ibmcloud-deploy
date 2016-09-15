@@ -195,11 +195,17 @@ describe('Interacting with Bluemix via Slack', function() {
 			return room.user.say('mimiron', 'yes');
 		}).then(() => {
 			expect(room.messages.length).to.eql(10);
+			expect(room.messages[9][1]).to.be.a('String');
+			expect(room.messages[9]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+			return room.user.say('mimiron', '@hubot master');
+		}).then(() => {
+			expect(room.messages.length).to.eql(12);
+			expect(room.messages[11]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'master', 'normanb/node-helloworld')}`]);
 		});
 	});
 
 	context('user calls `deploy app`', function() {
-		it('should respond with the deploy steps and fail', function() {
+		it('should respond with the deploy steps', function() {
 			return room.user.say('mimiron', '@hubot deploy app1').then(() => {
 				expect(room.messages.length).to.eql(3);
 				expect(room.messages[1][1]).to.be.a('String');
@@ -209,6 +215,14 @@ describe('Interacting with Bluemix via Slack', function() {
 				expect(room.messages[4]).to.eql(['hubot', '@mimiron ' + i18n.__('general.awesome')]);
 				expect(room.messages[5]).to.eql(['hubot', '@mimiron ' + i18n.__('github.deploy.repo.name.prompt')]);
 				return room.user.say('mimiron', 'user/helloworld');
+			}).then(() => {
+				expect(room.messages.length).to.eql(8);
+				expect(room.messages[7][1]).to.be.a('String');
+				expect(room.messages[7]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
+			}).then(() => {
+				expect(room.messages.length).to.eql(10);
+				expect(room.messages[9]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'app1', 'master', 'user/helloworld')}`]);
 			});
 		});
 
@@ -277,6 +291,15 @@ describe('Interacting with Bluemix via Slack', function() {
 		});
 	});
 
+	context('user calls `deploy url` with branch', function() {
+		it('should respond with the deploy steps', function() {
+			return room.user.say('mimiron', '@hubot deploy app user/helloworld/tree/master').then(() => {
+				expect(room.messages.length).to.eql(2);
+				expect(room.messages[1]).to.eql(['hubot', '@mimiron ' + i18n.__('github.deploy.in.progress', 'app', 'master', 'user/helloworld')]);
+			});
+		});
+	});
+
 	context('user calls `deploy app` with a zip and it exists', function() {
 		beforeEach(function() {
 			room.robot.brain.set('github-apps', {
@@ -293,12 +316,32 @@ describe('Interacting with Bluemix via Slack', function() {
 				expect(room.messages[1][1]).to.be.a('String');
 				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
 				expect(room.messages[2][1]).to.be.a('String');
-				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
-				return room.user.say('mimiron', '@hubot master');
-			}).then(() => {
-				expect(room.messages.length).to.eql(5);
-				expect(room.messages[4][1]).to.be.a('String');
-				expect(room.messages[4]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTest', 'master', 'user/manifestTest')}`]);
+				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTest', 'master', 'user/manifestTest')}`]);
+			});
+		});
+	});
+
+	context('user calls `deploy app` with a zip and it exists with multiple Branches', function() {
+		beforeEach(function() {
+			room.robot.brain.set('github-apps', {
+				manifestTest: 'user/manifestTestMultipleBranches'
+			});
+		});
+		afterEach(function() {
+			room.robot.brain.remove('github-apps');
+		});
+
+		it('should respond with list of branches to select from', function() {
+			return room.user.say('mimiron', '@hubot deploy manifestTest').then(() => {
+				expect(room.messages.length).to.eql(3);
+				expect(room.messages[1][1]).to.be.a('String');
+				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
+				expect(room.messages[2][1]).to.be.a('String');
+				expect(room.messages[2][1]).to.contain(i18n.__('github.deploy.branch.prompt'));
+				return room.user.say('mimiron', '@hubot 2').then(() => {
+					expect(room.messages.length).to.eql(5);
+					expect(room.messages[4]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTest', 'test-branch', 'user/manifestTestMultipleBranches')}`]);
+				});
 			});
 		});
 	});
@@ -329,4 +372,17 @@ describe('Interacting with Bluemix via Slack', function() {
 		});
 	});
 
+	// context('user calls `deploy app` with a zip for new app', function() {
+	//
+	// 	it.only('should respond with the apps that it will deploy with zip', function() {
+	// 		return room.user.say('mimiron', '@hubot deploy manifestTest user/manifestTest').then(() => {
+	// 			expect(room.messages.length).to.eql(2);
+	// 			expect(room.messages[1][1]).to.be.a('String');
+	// 			expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
+	// 			expect(room.messages[0][1]).to.be.a('String');
+	// 			expect(room.messages[0]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+	//
+	// 		});
+	// 	});
+	// });
 });
