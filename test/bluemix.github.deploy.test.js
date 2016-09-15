@@ -114,7 +114,12 @@ describe('Interacting with Bluemix via Slack', function() {
 				return room.user.say('mimiron', '@hubot node-helloworld');
 			}).then(() => {
 				expect(room.messages.length).to.eql(5);
-				expect(room.messages[4]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'normanb/node-helloworld')}`]);
+				expect(room.messages[4][1]).to.be.a('String');
+				expect(room.messages[4]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
+			}).then(() => {
+				expect(room.messages.length).to.eql(7);
+				expect(room.messages[6]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'master', 'normanb/node-helloworld')}`]);
 			});
 		});
 	});
@@ -154,12 +159,22 @@ describe('Interacting with Bluemix via Slack', function() {
 			return room.user.say('mimiron', '@hubot deploy normanb/node-helloworld node-helloworld').then(() => {
 				expect(room.messages.length).to.eql(2);
 				expect(room.messages[1][1]).to.be.a('String');
-				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'normanb/node-helloworld')}`]);
-				return room.user.say('mimiron', '@hubot deploy node-helloworld normanb/node-helloworld');
+				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
 			}).then(() => {
 				expect(room.messages.length).to.eql(4);
 				expect(room.messages[3][1]).to.be.a('String');
-				expect(room.messages[3]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'normanb/node-helloworld')}`]);
+				expect(room.messages[3]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'master', 'normanb/node-helloworld')}`]);
+				return room.user.say('mimiron', '@hubot deploy node-helloworld normanb/node-helloworld');
+			}).then(() => {
+				expect(room.messages.length).to.eql(8);
+				expect(room.messages[7][1]).to.be.a('String');
+				expect(room.messages[7]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
+			}).then(() => {
+				expect(room.messages.length).to.eql(10);
+				expect(room.messages[9][1]).to.be.a('String');
+				expect(room.messages[9]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'master', 'normanb/node-helloworld')}`]);
 			});
 		});
 	});
@@ -230,7 +245,12 @@ describe('Interacting with Bluemix via Slack', function() {
 				expect(room.messages[1][1]).to.be.a('String');
 				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
 				expect(room.messages[2][1]).to.be.a('String');
-				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'normanb/node-helloworld')}`]);
+				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
+			}).then(() => {
+				expect(room.messages.length).to.eql(5);
+				expect(room.messages[4][1]).to.be.a('String');
+				expect(room.messages[4]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'node-helloworld', 'master', 'normanb/node-helloworld')}`]);
 			});
 		});
 	});
@@ -247,7 +267,12 @@ describe('Interacting with Bluemix via Slack', function() {
 				return room.user.say('mimiron', 'helloworld');
 			}).then(() => {
 				expect(room.messages.length).to.eql(7);
-				expect(room.messages[6]).to.eql(['hubot', '@mimiron ' + i18n.__('github.deploy.in.progress', 'helloworld', 'user/helloworld')]);
+				expect(room.messages[6][1]).to.be.a('String');
+				expect(room.messages[6]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
+			}).then(() => {
+				expect(room.messages.length).to.eql(9);
+				expect(room.messages[8]).to.eql(['hubot', '@mimiron ' + i18n.__('github.deploy.in.progress', 'helloworld', 'master', 'user/helloworld')]);
 			});
 		});
 	});
@@ -268,7 +293,12 @@ describe('Interacting with Bluemix via Slack', function() {
 				expect(room.messages[1][1]).to.be.a('String');
 				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
 				expect(room.messages[2][1]).to.be.a('String');
-				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTest', 'user/manifestTest')}`]);
+				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
+			}).then(() => {
+				expect(room.messages.length).to.eql(5);
+				expect(room.messages[4][1]).to.be.a('String');
+				expect(room.messages[4]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTest', 'master', 'user/manifestTest')}`]);
 			});
 		});
 	});
@@ -289,7 +319,12 @@ describe('Interacting with Bluemix via Slack', function() {
 				expect(room.messages[1][1]).to.be.a('String');
 				expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
 				expect(room.messages[2][1]).to.be.a('String');
-				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTestNoApp', 'user/manifestTestNoApp')}`]);
+				expect(room.messages[2]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
+				return room.user.say('mimiron', '@hubot master');
+			}).then(() => {
+				expect(room.messages.length).to.eql(5);
+				expect(room.messages[4][1]).to.be.a('String');
+				expect(room.messages[4]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress', 'manifestTestNoApp', 'master', 'user/manifestTestNoApp')}`]);
 			});
 		});
 	});
