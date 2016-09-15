@@ -371,18 +371,4 @@ describe('Interacting with Bluemix via Slack', function() {
 			});
 		});
 	});
-
-	// context('user calls `deploy app` with a zip for new app', function() {
-	//
-	// 	it.only('should respond with the apps that it will deploy with zip', function() {
-	// 		return room.user.say('mimiron', '@hubot deploy manifestTest user/manifestTest').then(() => {
-	// 			expect(room.messages.length).to.eql(2);
-	// 			expect(room.messages[1][1]).to.be.a('String');
-	// 			expect(room.messages[1]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.in.progress.matching')}`]);
-	// 			expect(room.messages[0][1]).to.be.a('String');
-	// 			expect(room.messages[0]).to.eql(['hubot', `@mimiron ${i18n.__('github.deploy.branch.prompt')}`]);
-	//
-	// 		});
-	// 	});
-	// });
 });
