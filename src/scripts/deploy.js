@@ -132,6 +132,7 @@ module.exports = function(robot) {
 			});
 		}
 		else {
+			let expr = '';
 			const attachments = Object.keys(apps).map((app) => {
 				const attachment = {
 					title: app,
@@ -140,31 +141,32 @@ module.exports = function(robot) {
 				attachment.fields = [
 					{title: 'repo', value: apps[app]}
 				];
-
-				const expr = new RegExp(`(${app})`, 'i');
-
+				expr += app + '|';
 				robot.logger.debug(`${TAG}: adding a dialog choice for ${app} that is ${expr.toString()}`);
-				let prompt = i18n.__('github.deploy.app.select');
-				utils.getExpectedResponse(res, robot, switchBoard, prompt, expr).then((response) => {
-					let chosenApp = response.match[1];
-					const entry = {app: chosenApp, url: apps[chosenApp]};
-					getEntry(robot, res, switchBoard, entry).then(entry => {
-						let message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
-						robot.emit('ibmcloud.formatter', { response: res, message: message});
-						const activeSpace = cf.activeSpace(robot, res);
-						robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
-						cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
-							robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
-							deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
-						})
-						.catch((err) => {
-							robot.logger.error(`${TAG}: An error occurred.`);
-							robot.logger.error(err);
-						});
-					});
-				});
 
 				return attachment;
+			});
+
+			expr = new RegExp(`(${expr.slice(0, -1)})`, 'i');
+
+			let prompt = i18n.__('github.deploy.app.select');
+			utils.getExpectedResponse(res, robot, switchBoard, prompt, expr).then((response) => {
+				let chosenApp = response.match[1];
+				const entry = {app: chosenApp, url: apps[chosenApp]};
+				getEntry(robot, res, switchBoard, entry).then(entry => {
+					let message = i18n.__('github.deploy.in.progress', entry.app, entry.branch, entry.url);
+					robot.emit('ibmcloud.formatter', { response: res, message: message});
+					const activeSpace = cf.activeSpace(robot, res);
+					robot.logger.info(`${TAG}: Asynch call using cf library to obtain application data for ${entry.app}.`);
+					cf.Apps.getApp(entry.app, activeSpace.guid).then((result) => {
+						robot.logger.info(`${TAG}: cf library returned with app info for  ${entry.app}.`);
+						deploy(entry, result ? result.metadata.guid : undefined, activeSpace.guid, activeSpace.name, robot, res);
+					})
+					.catch((err) => {
+						robot.logger.error(`${TAG}: An error occurred.`);
+						robot.logger.error(err);
+					});
+				});
 			});
 
 			// Emit the app status as an attachment
