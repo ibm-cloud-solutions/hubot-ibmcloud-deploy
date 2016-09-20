@@ -659,7 +659,7 @@ function getEntry(robot, res, switchBoard, entry) {
 				}
 				else {
 					let prompt = i18n.__('github.deploy.branch.prompt');
-					utils.getExpectedResponse(res, robot, switchBoard, prompt, /(?:\S+\s+){1}(\S+)/i).then((branchRes) => {
+					utils.getExpectedResponse(res, robot, switchBoard, prompt, /(.*)/i).then((branchRes) => {
 						entry.branch = branchRes.match[1];
 						resolve(entry);
 					}).catch((err) => {
