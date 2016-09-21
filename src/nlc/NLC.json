@@ -4,6 +4,7 @@
         {
             "class": "github.deploy.help",
             "description": "Help with application deployment",
+            "confirmprompt": "Would you like help with Bluemix application deployment from github (yes or no)?",
             "emittarget": "github.deploy.help",
             "texts": [
                 "I want help with deployment",
@@ -16,6 +17,7 @@
         {
             "class": "github.deploy",
             "description": "Deploy an application to Bluemix",
+            "confirmprompt": "Would you like to deploy the ${appname} Bluemix application from the ${url} github repository (yes or no)?",
             "emittarget": "github.deploy",
             "texts": [
                 "I want to deploy my application",
