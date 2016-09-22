@@ -7,7 +7,7 @@
    "general.ok.another.time": "Ok.  Maybe another time.",
    "general.safe.this.time": "Ok, '%s' is safe this time around.",
 
-   "github.deploy.app.select": "Which app would you like to deploy?  Here are the ones I know about:",
+   "github.deploy.app.select": "Which app would you like to deploy?",
    "github.deploy.failure": "Sorry, I tried my best.",
    "github.deploy.in.progress": "Deploying *%s* from *%s* branch of %s.",
    "github.deploy.in.progress.matching": "Deploying matching apps.",
